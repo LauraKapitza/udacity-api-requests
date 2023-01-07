@@ -61,7 +61,7 @@ def create_app(test_config=None):
 
     @app.delete('/books/<int:book_id>')
     def delete_book(book_id):
-        book = Book.query.filter(Book.id == book_id).one_or_none()
+        book = Book.query.filter(Book.id == book_id).first_or_404()
         book.delete()
 
         books = Book.query.all()
