@@ -9,6 +9,16 @@ import random
 BOOKS_PER_SHELF = 8
 
 
+def paginate_books(request, books):
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * BOOKS_PER_SHELF
+    end = start + BOOKS_PER_SHELF
+
+    formatted_books = [book.format() for book in books]
+
+    return formatted_books[start:end]
+
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -28,16 +38,12 @@ def create_app(test_config=None):
 
     @app.get('/books')
     def get_books():
-        page = request.args.get('page', 1, type=int)
-        start = (page - 1) * BOOKS_PER_SHELF
-        end = start + BOOKS_PER_SHELF
-
         books = Book.query.all()
-        formatted_books = [book.format() for book in books]
+        paginated_books = paginate_books(request, books)
         return jsonify({
             'success': True,
-            'books': formatted_books[start:end],
-            'total_books': len(formatted_books)
+            'books': paginated_books,
+            'total_books': len(books)
         })
 
     @app.patch('/books/<int:book_id>')
@@ -56,17 +62,14 @@ def create_app(test_config=None):
         book = Book.query.filter(Book.id == book_id).one_or_none()
         book.delete()
 
-        page = request.args.get('page', 1, type=int)
-        start = (page - 1) * BOOKS_PER_SHELF
-        end = start + BOOKS_PER_SHELF
-
         books = Book.query.all()
-        formatted_books = [book.format() for book in books]
+        paginated_books = paginate_books(request, books)
+
         return jsonify({
             'success': True,
             'deleted': book_id,
-            'books': formatted_books[start:end],
-            'total_books': len(formatted_books)
+            'books': paginated_books,
+            'total_books': len(books)
         })
 
     @app.post('/books')
@@ -79,17 +82,14 @@ def create_app(test_config=None):
         )
         book.insert()
 
-        page = request.args.get('page', 1, type=int)
-        start = (page - 1) * BOOKS_PER_SHELF
-        end = start + BOOKS_PER_SHELF
-
         books = Book.query.all()
-        formatted_books = [book.format() for book in books]
+        paginated_books = paginate_books(request, books)
+
         return jsonify({
             'success': True,
             'created': book.id,
-            'books': formatted_books[start:end],
-            'total_books': len(formatted_books)
+            'books': paginated_books,
+            'total_books': len(books)
         })
 
     return app
