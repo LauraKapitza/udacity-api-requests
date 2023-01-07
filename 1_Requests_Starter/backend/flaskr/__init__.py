@@ -50,7 +50,9 @@ def create_app(test_config=None):
     def update_rating(book_id):
         book = Book.query.filter(Book.id == book_id).first_or_404()
         updates = request.get_json()
-        book.rating = updates["rating"]
+        if 'rating' in updates:
+            book.rating = updates["rating"]
+
         book.update()
 
         return jsonify({
