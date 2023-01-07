@@ -127,11 +127,6 @@ def create_app(test_config=None):
         except:
             abort(422)
 
-    # @TODO: Review the above code for route handlers.
-    #        Pay special attention to the status codes used in the aborts since those are relevant for this task!
-
-    # @TODO: Write error handler decorators to handle AT LEAST status codes 400, 404, and 422.
-
     @app.errorhandler(400)
     def bad_request(error):
         return jsonify(
