@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy  # , or_
 from flask_cors import CORS
 import random
 
-
 BOOKS_PER_SHELF = 8
 
 
@@ -77,21 +76,24 @@ def create_app(test_config=None):
     @app.post('/books')
     def add_book():
         form = request.get_json()
-        book = Book(
-            title=form["title"],
-            author=form["author"],
-            rating=form["rating"]
-        )
-        book.insert()
+        try:
+            book = Book(
+                title=form["title"],
+                author=form["author"],
+                rating=form["rating"]
+            )
+            book.insert()
 
-        books = Book.query.all()
-        paginated_books = paginate_books(request, books)
+            books = Book.query.all()
+            paginated_books = paginate_books(request, books)
 
-        return jsonify({
-            'success': True,
-            'created': book.id,
-            'books': paginated_books,
-            'total_books': len(books)
-        })
+            return jsonify({
+                'success': True,
+                'created': book.id,
+                'books': paginated_books,
+                'total_books': len(books)
+            })
+        except:
+            abort(422)
 
     return app
