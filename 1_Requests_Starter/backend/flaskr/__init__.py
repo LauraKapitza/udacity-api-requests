@@ -38,7 +38,7 @@ def create_app(test_config=None):
     #         update the frontend to handle additional books in the styling and pagination
     #         Response body keys: 'success', 'books' and 'total_books'
     # TEST: When completed, the webpage will display books including title, author, and rating shown as stars
-    @app.route('/books')
+    @app.get('/books')
     def get_books():
         page = request.args.get('page', 1, type=int)
         start = (page - 1) * BOOKS_PER_SHELF
@@ -68,5 +68,27 @@ def create_app(test_config=None):
     #        Response body keys: 'success', 'created'(id of created book), 'books' and 'total_books'
     # TEST: When completed, you will be able to a new book using the form. Try doing so from the last page of books.
     #       Your new book should show up immediately after you submit it at the end of the page.
+    @app.post('/books')
+    def add_book():
+        form = request.get_json()
+        book = Book(
+            title=form["title"],
+            author=form["author"],
+            rating=form["rating"]
+        )
+        book.insert()
+
+        page = request.args.get('page', 1, type=int)
+        start = (page - 1) * BOOKS_PER_SHELF
+        end = start + BOOKS_PER_SHELF
+
+        books = Book.query.all()
+        formatted_books = [book.format() for book in books]
+        return jsonify({
+            'success': True,
+            'created': book.id,
+            'books': formatted_books[start:end],
+            'total_books': len(formatted_books)
+        })
 
     return app
